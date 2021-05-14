@@ -126,7 +126,7 @@ raise Exception, "This will get reported!"
 
 That's it! For additional configuration options, keep reading.
 
-##NB: By default, honeybadger reports errors in separate threads. For platforms that disallows threading (such as serving a flask/django app with uwsgi and disabling threading), Honeybadger will fail to report errors. You can either enable threading if you have the option, or set `force_sync` config option to `True`. This causes Honeybadger to report errors in a single thread. 
+**Note:** By default, honeybadger reports errors in separate threads. For platforms that disallows threading (such as serving a flask/django app with uwsgi and disabling threading), Honeybadger will fail to report errors. You can either enable threading if you have the option, or set `force_sync` config option to `True`. This causes Honeybadger to report errors in a single thread.
 
 ## Logging
 
