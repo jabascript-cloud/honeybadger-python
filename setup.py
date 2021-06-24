@@ -4,13 +4,13 @@ import os
 from codecs import open
 from setuptools import setup
 
-tests_require = ['nose', 'mock', 'testfixtures', 'blinker']
+tests_require = ['nose', 'mock', 'testfixtures', 'blinker', 'async-asgi-testclient', 'aiounittest', 'fastapi']
 
 if sys.version_info[0:2] >= (3, 5):
     tests_require.append('Flask>=1.0')
     # For some reason, Flask 1.1.1 is pulling in Jinja2 3.0.0 which causes syntax errors.
-    tests_require.append('Jinja2<3.0.0')
-    tests_require.append('MarkupSafe<2.0.0')
+    tests_require.append('Jinja2<4.0.0')
+    tests_require.append('MarkupSafe<3.0.0')
 
 if sys.version_info[0:2] <= (3, 5):
     tests_require.append('Django>=1.11,<=2.2')

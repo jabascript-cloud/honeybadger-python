@@ -50,7 +50,7 @@ class DjangoPluginTestCase(unittest.TestCase):
         self.rf = RequestFactory()
         self.config = Configuration()
         self.url = url(r'test', plain_view, name='test_view')
-        self.default_payload = {}
+        self.default_payload = {'request':{}}
 
     def tearDown(self):
         clear_request()
