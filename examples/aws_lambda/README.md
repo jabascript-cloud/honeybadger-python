@@ -10,7 +10,7 @@ https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-mac.html#cliv2-ma
 ## Deploying
 
 Install honeybadger in a package directory with pip's --target option
-`pip install --target ./package honeybadger`
+`pip3 install --target ./package ../../`
 
 `Navigate to package directory
 `cd package`
