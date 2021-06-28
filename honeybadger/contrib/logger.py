@@ -41,7 +41,7 @@ class HoneybadgerHandler(logging.Handler):
         
         try:
             self.honeybadger.notify(
-                error_class = record.levelname,
+                error_class = "%s Log" %record.levelname,
                 error_message = record.getMessage(),
                 context = self._get_context(record)
                 )
