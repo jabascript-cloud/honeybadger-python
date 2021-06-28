@@ -273,6 +273,24 @@ import logging
 logging.getLogger('honeybadger').addHandler(logging.StreamHandler())
 ```
 
+### Log Handler
+Honeybadger includes a log handler that can be used to report logs of any level via python's logging module.
+
+```python
+import logging
+from honeybadger.contrib.logger import HoneybadgerHandler
+
+hb_handler = HoneybadgerHandler(api_key='your api key)
+logger = logging.getLogger('honeybadger')
+logger.addHandler(hb_handler)
+
+try:
+  1/0
+except:
+  logger.error("Something went wrong")
+
+```
+
 ## <a name="config"></a>Configuration
 
 To set configuration options, use the `honeybadger.configure` method, like so:
