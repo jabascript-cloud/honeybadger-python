@@ -288,6 +288,28 @@ try:
   1/0
 except:
   logger.error("Something went wrong")
+```
+
+or using Dict Config:
+```python
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'honeybadger': {
+            'level': 'ERROR',
+            'class': 'honeybadger.contrib.logger.HoneybadgerHandler',
+            'api_key': '**YOUR API KEY**',
+        },
+    },
+    'loggers': {
+        # root logger
+        '': {
+            'level': 'WARNING',
+            'handlers': ['console', 'honeybadger'],
+        },
+    },
+}
 
 ```
 
