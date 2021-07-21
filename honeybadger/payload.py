@@ -91,9 +91,13 @@ def stats_payload():
 
         return payload
 
-def create_payload(exception, exc_traceback=None, config=None, context={}):
+def create_payload(exception, exc_traceback=None, config=None, context=None):
     if exc_traceback is None:
         exc_traceback = sys.exc_info()[2]
+    
+    #if context is None, Initialize as an emptty dict
+    if not context:
+        context = {}
 
     payload =  {
         'notifier': {
