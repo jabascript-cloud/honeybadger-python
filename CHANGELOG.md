@@ -10,7 +10,6 @@ adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Allow 'None' as argument for context (#92)
 
-
 ## [0.6.0] - 2021-05-24
 ### Added
 - Add new ASGI middleware plugin (FastAPI, Starlette, Uvicorn). (#84)

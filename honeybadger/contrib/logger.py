@@ -28,7 +28,6 @@ class HoneybadgerHandler(logging.Handler):
 
         self.honeybadger = Honeybadger()
         self.honeybadger.configure(api_key=api_key)
-        print(api_key)
 
         logging.Handler.__init__(self)
 
