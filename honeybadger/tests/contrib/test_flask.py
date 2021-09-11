@@ -23,7 +23,7 @@ class FlaskPluginTestCase(unittest.TestCase):
             self.skipTest('Flask 1.1 requires Python > 3.4')
 
         self.config = Configuration()
-        self.default_payload = {}
+        self.default_payload = {'request':{}}
 
         self.app = flask.Flask(__name__)
         self.app.secret_key = 'safe'
