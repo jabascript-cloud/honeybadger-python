@@ -128,7 +128,6 @@ class AWSLambdaPlugin(Plugin):
         Here we fetch the http & event handler from the lambda bootstrap module
         and override it with a wrapped version
         """
-
         def event_handler(request_handler, *args, **kwargs):
             request_handler = _wrap_lambda_handler(request_handler)
             return original_event_handler(request_handler, *args, **kwargs)
@@ -136,15 +135,17 @@ class AWSLambdaPlugin(Plugin):
         def http_handler(request_handler, *args, **kwargs):
             request_handler = _wrap_lambda_handler(request_handler)
             return original_http_handler(request_handler, *args, **kwargs)
-        
+
         try:
-            #Get the original handler for events & http request
+            #Get and replace the original handler for events with a wrapped one
             original_event_handler = lambda_bootstrap.handle_event_request
-            original_http_handler = lambda_bootstrap.handle_http_request
-            
-            #Replace the original handlers for events & http request with a wrapped one
             lambda_bootstrap.handle_event_request = event_handler
-            lambda_bootstrap.handle_http_request = http_handler
+
+            # "handle_http_request" was removed from python 3.7 and above
+            # so attempting to wrap the function will fail
+            if hasattr(lambda_bootstrap, "handle_http_request"): #pre python3.7
+                original_http_handler = lambda_bootstrap.handle_http_request
+                lambda_bootstrap.handle_http_request = http_handler
 
         # Future lambda runtime may change execution strategy
         # Third party lambda services (such as zappa) may override function execution
