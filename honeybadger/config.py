@@ -14,7 +14,8 @@ class Configuration(object):
         ('endpoint', str),
         ('params_filters', list),
         ('force_report_data', bool),
-        ('force_sync', bool)
+        ('force_sync', bool),
+        ('excluded_exceptions', list)
     )
 
     def __init__(self, *args, **kwargs):
@@ -26,6 +27,7 @@ class Configuration(object):
         self.params_filters = ['password', 'password_confirmation', 'credit_card', 'CSRF_COOKIE']
         self.force_report_data = False
         self.force_sync = self.is_aws_lambda_environment
+        self.excluded_exceptions = []
         
         self.set_12factor_config()
         self.set_config_from_dict(kwargs)

@@ -5,6 +5,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
+- Add `excluded_exceptions` config option (#94)
 - Add `CSRF_COOKIE` to default filter_params (#44)
 - Add `HTTP_COOKIE` to payload for flask & django (#44)
 - Filter meta (cgi_data) attributes for flask & django (#43)

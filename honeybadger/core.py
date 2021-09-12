@@ -41,6 +41,9 @@ class Honeybadger(object):
         self.existing_except_hook(type, value, exc_traceback)
 
     def notify(self, exception=None, error_class=None, error_message=None, context={}):
+        if exception and exception.__class__.__name__ in self.config.excluded_exceptions:
+            return #Terminate the function
+
         if exception is None:
             exception = {
                 'error_class': error_class,
