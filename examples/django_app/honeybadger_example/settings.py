@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Add honeybadger middleware
-    'honeybadger.middleware.DjangoHoneybadgerMiddleware'
+    'honeybadger.contrib.DjangoHoneybadgerMiddleware',
 ]
 
 ROOT_URLCONF = 'honeybadger_example.urls'

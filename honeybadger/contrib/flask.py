@@ -70,7 +70,7 @@ class FlaskPlugin(Plugin):
 
         payload['params'] = params
 
-        default_payload['request'] = payload
+        default_payload['request'].update(payload)
 
         return default_payload
 
