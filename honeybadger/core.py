@@ -19,7 +19,7 @@ class Honeybadger(object):
         self.thread_local = threading.local()
         self.thread_local.context = {}
 
-    def _send_notice(self, exception, exc_traceback=None, context={}):
+    def _send_notice(self, exception, exc_traceback=None, context=None):
         payload = create_payload(exception, exc_traceback, config=self.config, context=context)
         if self.config.is_dev() and not self.config.force_report_data:
             fake_connection.send_notice(self.config, payload)
@@ -51,7 +51,8 @@ class Honeybadger(object):
             }
 
         merged_context = self._get_context()
-        merged_context.update(context)
+        if context:
+            merged_context.update(context)
 
         self._send_notice(exception, context=merged_context)
 

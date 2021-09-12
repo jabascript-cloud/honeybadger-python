@@ -65,9 +65,7 @@ order for the extension to work, you'll have to install the `blinker` library as
 keys with same name as the environment variables in [Configuration](#config) section. Note that if a value is also configured as an environment variable,
 then the environment variable's value will be used.
 
-Let's see it in action with an example:
-
-### Example 1: Setup Honeybadger and automatically report exceptions
+#### Example
 
 ```python
 from flask import Flask, jsonify, request
@@ -111,6 +109,119 @@ The following conventions are used for component names:
 - For class-based views, the name of the component will be _\<module name>___#___\<class name>_
 - When using blueprints, the name of the component will be  _\<module name>___#___\<blueprint name>_._\<view name>_
 
+
+### AWS Lambda
+
+AWS Lambda environments are auto detected by Honeybadger with no additional configuration.
+Here's an example lambda function with Honeybadger:
+
+```python
+from honeybadger import honeybadger
+honeybadger.configure(api_key='myapikey')
+
+def lambda_handler(event, context):
+    """
+    A buggy lambda function that tries to perform a zero division
+    """
+    a = 1
+    b = 0
+
+    return (a/b) #This will be reported
+```
+
+### ASGI
+
+A generic [ASGI](https://asgi.readthedocs.io/en/latest/) middleware plugin is available for initializing and configuring Honeybadger: [`honeybadger.contrib.asgi`](./honeybadger/contrib/asgi.py).
+
+The general pattern for these cases is wrapping your ASGI application with a middleware:
+
+```python
+from honeybadger import contrib
+
+asgi_application = someASGIApplication()
+asgi_application = contrib.ASGIHoneybadger(asgi_application)
+```
+
+You can pass configuration parameters (or *additional* configuration parameters) as keyword arguments at plugin's initialization:
+
+```python
+from honeybadger import contrib
+
+asgi_application = someASGIApplication()
+asgi_application = contrib.ASGIHoneybadger(asgi_application, api_key="<your-api-key>", params_filters=["sensible_data"])
+
+```
+
+Or you may want to initialize Honeybadger before your application, and then just registering the plugin/middleware:
+
+```python
+from honeybadger import honeybadger, contrib
+
+honeybadger.configure(api_key='<your-api-key>')
+some_possibly_failing_function()  # you can track errors happening before your plugin initialization.
+asgi_application = someASGIApplication()
+asgi_application = contrib.ASGIHoneybadger(asgi_application)
+```
+
+### FastAPI
+
+[FastAPI](https://fastapi.tiangolo.com/) is based on Starlette, an ASGI application.
+You use Honeybadger's ASGI middleware on these types of applications.
+
+```python
+
+from fastapi import FastAPI
+from honeybadger import contrib
+
+app = FastAPI()
+app.add_middleware(contrib.ASGIHoneybadger)
+```
+
+You can pass additional keyword paramters, too:
+
+```python
+from fastapi import FastAPI
+from honeybadger import honeybadger, contrib
+
+honeybadger.configure(api_key="<your-api-key>")
+app = FastAPI()
+app.add_middleware(contrib.ASGIHoneybadger, params_filters=["dont-include-this"])
+```
+
+#### FastAPI advanced usage.
+
+Consuming the request body in an ASGI application's middleware is [problematic and discouraged](https://github.com/encode/starlette/issues/495#issuecomment-494008175). This is the reason why request body data won't be sent to the web UI.
+
+FastAPI allows overriding the logic used by the `Request` and `APIRoute` classes, by [using custom `APIRoute` classes](https://fastapi.tiangolo.com/advanced/custom-request-and-route/). This gives more control over the request body, and makes it possible to send request body data along with honeybadger notifications. 
+
+A custom API Route is available at [`honeybadger.contrib.fastapi`](./honeybadger/contrib/fastapi):
+
+```python
+from fastapi import FastAPI, APIRouter
+from honeybadger import honeybadger
+from honeybadger.contrib.fastapi import HoneybadgerRoute
+
+honeybadger.configure(api_key="<your-api-key>")
+app = FastAPI()
+app.router.route_class = HoneybadgerRoute
+
+router = APIRouter(route_class=HoneybadgerRoute)
+
+```
+
+### Starlette
+You can configure Honeybadger to work with [Starlette](https://www.starlette.io/) just like in any other ASGI framework.
+
+```python
+from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from honeybadger import contrib
+
+
+app = Starlette()
+app.add_middleware(contrib.ASGIHoneybadger)
+```
+
 ### Other frameworks / plain Python app
 
 Django and Flask are the only explicitly supported frameworks at the moment. For other frameworks (tornado, web2py, etc.) or a plain Python script, simply import honeybadger and configure it with your API key. Honeybadger uses a global exception hook to automatically report any uncaught exceptions.
@@ -125,6 +236,8 @@ raise Exception, "This will get reported!"
 ### All set!
 
 That's it! For additional configuration options, keep reading.
+
+**Note:** By default, honeybadger reports errors in separate threads. For platforms that disallows threading (such as serving a flask/django app with uwsgi and disabling threading), Honeybadger will fail to report errors. You can either enable threading if you have the option, or set `force_sync` config option to `True`. This causes Honeybadger to report errors in a single thread.
 
 ## Logging
 
@@ -158,7 +271,47 @@ import logging
 logging.getLogger('honeybadger').addHandler(logging.StreamHandler())
 ```
 
-## <a name="config"></a>Configuration
+### Log Handler
+Honeybadger includes a log handler that can be used to report logs of any level via python's logging module.
+
+```python
+import logging
+from honeybadger.contrib.logger import HoneybadgerHandler
+
+hb_handler = HoneybadgerHandler(api_key='your api key)
+logger = logging.getLogger('honeybadger')
+logger.addHandler(hb_handler)
+
+try:
+  1/0
+except:
+  logger.error("Something went wrong")
+```
+
+or using Dict Config:
+
+```python
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'honeybadger': {
+            'level': 'ERROR',
+            'class': 'honeybadger.contrib.logger.HoneybadgerHandler',
+            'api_key': '**YOUR API KEY**',
+        },
+    },
+    'loggers': {
+        # root logger
+        '': {
+            'level': 'WARNING',
+            'handlers': ['console', 'honeybadger'],
+        },
+    },
+}
+```
+
+## Configuration
 
 To set configuration options, use the `honeybadger.configure` method, like so:
 
@@ -180,6 +333,7 @@ The following options are available to you:
 | params_filters | `list` | `['password', 'password_confirmation', 'credit_card']` | `['super', 'secret', 'keys']` | `HONEYBADGER_PARAMS_FILTERS` |
 | force_report_data | `bool` | `False` | `True` | `HONEYBADGER_FORCE_REPORT_DATA` |
 | excluded_exceptions | `list` | `["AttributeError", "SomeOtherError"]` | `HONEYBADGER_EXCLUDED_EXCEPTIONS` |
+| force_sync | `bool` | `False` | `True` | `HONEYBADGER_FORCE_SYNC` |
 
 ## Public Methods
 

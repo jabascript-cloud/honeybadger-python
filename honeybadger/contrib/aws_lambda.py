@@ -7,6 +7,11 @@ from honeybadger.utils import filter_dict
 
 from threading import local
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 _thread_locals = local()
 REQUEST_LOCAL_KEY = '__awslambda_current_request'
 
@@ -94,7 +99,7 @@ class AWSLambdaPlugin(Plugin):
             },
             "context": context
         }
-        default_payload["request"] = filter_dict(request_payload, config.params_filters)
+        default_payload["request"].update(filter_dict(request_payload, config.params_filters))
 
         AWS_ENV_MAP = (
             ("_HANDLER", "handler"),
@@ -123,21 +128,30 @@ class AWSLambdaPlugin(Plugin):
         Here we fetch the http & event handler from the lambda bootstrap module
         and override it with a wrapped version
         """
-        #Get the original handler for events & http request
-        original_event_handler = lambda_bootstrap.handle_event_request
-        original_http_handler = lambda_bootstrap.handle_http_request
-        
+
         def event_handler(request_handler, *args, **kwargs):
             request_handler = _wrap_lambda_handler(request_handler)
             return original_event_handler(request_handler, *args, **kwargs)
-            
+                
         def http_handler(request_handler, *args, **kwargs):
             request_handler = _wrap_lambda_handler(request_handler)
             return original_http_handler(request_handler, *args, **kwargs)
         
-        #Replace the original handlers for events & http request with a wrapped one
-        lambda_bootstrap.handle_event_request = event_handler
-        lambda_bootstrap.handle_http_request = http_handler
+        try:
+            #Get the original handler for events & http request
+            original_event_handler = lambda_bootstrap.handle_event_request
+            original_http_handler = lambda_bootstrap.handle_http_request
+            
+            #Replace the original handlers for events & http request with a wrapped one
+            lambda_bootstrap.handle_event_request = event_handler
+            lambda_bootstrap.handle_http_request = http_handler
+
+        # Future lambda runtime may change execution strategy
+        # Third party lambda services (such as zappa) may override function execution
+        # either of these will raise an Attribute error as "handle_event_request" or "handle_event_request"
+        # may not be found.
+        except AttributeError as e:
+            logger.warning('Lambda function not wrapped by honeybadger: %s' %e)
         
         
         

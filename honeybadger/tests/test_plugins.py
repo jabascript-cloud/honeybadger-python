@@ -33,12 +33,16 @@ class PluginManagerTestCase(unittest.TestCase):
         self.plugin2.generate_payload.return_value = {'name': 'plugin2'}
 
         payload = self.manager.generate_payload(self.default_payload, context=context)
-        # Expect order to be preferred and use value from first plugin
-        self.assertDictEqual({'name': 'plugin1'}, payload)
+        # Expect order to be preferred and use value from all registered plugins.
+        # Plugin2 is given a forced return value for the sake of testing,
+        # hence it overrides payload from plugin1
+        self.assertDictEqual({'name': 'plugin2'}, payload)
         self.plugin1.supports.assert_called_once_with(None, context)
         self.plugin1.generate_payload.assert_called_once_with(self.default_payload, None, context)
-        self.assertEqual(0, self.plugin2.supports.call_count)
-        self.assertEqual(0, self.plugin2.generate_payload.call_count)
+
+        #Assert both plugins got called once
+        self.assertEqual(1, self.plugin2.supports.call_count)
+        self.assertEqual(1, self.plugin2.generate_payload.call_count)
 
     def test_generate_payload_second_plugin(self):
         self.manager.register(self.plugin1)

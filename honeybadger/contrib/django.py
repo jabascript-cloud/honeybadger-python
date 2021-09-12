@@ -90,7 +90,7 @@ class DjangoPlugin(Plugin):
         else:
             request_payload['params'] = filter_dict(dict(request.POST), config.params_filters)
 
-        default_payload['request'] = request_payload
+        default_payload['request'].update(request_payload)
 
         return default_payload
 
