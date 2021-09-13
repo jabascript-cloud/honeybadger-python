@@ -5,7 +5,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Added `excluded_exception` config option
+- Added `excluded_exceptions` config option
 
 ## [0.7.0] - 2021-08-16
 ### Added
