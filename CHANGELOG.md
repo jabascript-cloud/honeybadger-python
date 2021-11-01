@@ -5,7 +5,7 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Added `excluded_exceptions` config option
+- Added `excluded_exceptions` config option (#98)
 
 ## [0.7.0] - 2021-08-16
 ### Added
@@ -25,7 +25,6 @@ adheres to [Semantic Versioning](http://semver.org/).
 ## [0.5.0] - 2021-03-17
 
 ### Added
-- Add `excluded_exceptions` config option (#94)
 - Add `CSRF_COOKIE` to default filter_params (#44)
 - Add `HTTP_COOKIE` to payload for flask & django (#44)
 - Filter meta (cgi_data) attributes for flask & django (#43)
