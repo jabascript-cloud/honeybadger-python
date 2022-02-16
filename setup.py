@@ -4,7 +4,7 @@ import os
 from codecs import open
 from setuptools import setup
 
-tests_require = ['nose', 'mock', 'testfixtures', 'blinker', 'async-asgi-testclient', 'aiounittest', 'fastapi']
+tests_require = ['pytest', 'mock', 'testfixtures', 'blinker', 'async-asgi-testclient', 'aiounittest', 'fastapi']
 
 if sys.version_info[0:2] >= (3, 5):
     tests_require.append('Flask>=1.0')
@@ -27,7 +27,6 @@ def get_version():
     with open('honeybadger/version.py', encoding='utf-8') as f:
         return re.search(r'^__version__ = [\'"]([^\'"]+)[\'"]', f.read(), re.M).group(1)
 
-
 setup(
     name='honeybadger',
     version=get_version(),
@@ -41,16 +40,16 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: System :: Monitoring'
     ],
     install_requires=[
         'psutil',
         'six'
     ],
-    test_suite='nose.collector',
+    # test_suite='pytest.main',
     tests_require=tests_require
 )
