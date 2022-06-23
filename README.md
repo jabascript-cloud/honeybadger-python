@@ -72,7 +72,7 @@ from flask import Flask, jsonify, request
 from honeybadger.contrib import FlaskHoneybadger
 
 app = Flask(__name__)
-app.config['HONEYBADGER_ENVIRONMENT'] = 'development'
+app.config['HONEYBADGER_ENVIRONMENT'] = 'production'
 app.config['HONEYBADGER_API_KEY'] = '<your key>'
 app.config['HONEYBADGER_PARAMS_FILTERS'] = 'password, secret, credit-card'
 FlaskHoneybadger(app, report_exceptions=True)
@@ -192,7 +192,7 @@ app.add_middleware(contrib.ASGIHoneybadger, params_filters=["dont-include-this"]
 
 Consuming the request body in an ASGI application's middleware is [problematic and discouraged](https://github.com/encode/starlette/issues/495#issuecomment-494008175). This is the reason why request body data won't be sent to the web UI.
 
-FastAPI allows overriding the logic used by the `Request` and `APIRoute` classes, by [using custom `APIRoute` classes](https://fastapi.tiangolo.com/advanced/custom-request-and-route/). This gives more control over the request body, and makes it possible to send request body data along with honeybadger notifications. 
+FastAPI allows overriding the logic used by the `Request` and `APIRoute` classes, by [using custom `APIRoute` classes](https://fastapi.tiangolo.com/advanced/custom-request-and-route/). This gives more control over the request body, and makes it possible to send request body data along with honeybadger notifications.
 
 A custom API Route is available at [`honeybadger.contrib.fastapi`](./honeybadger/contrib/fastapi):
 
