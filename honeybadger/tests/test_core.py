@@ -16,6 +16,15 @@ def test_set_context():
     honeybadger.set_context(bar='foo')
     eq_(honeybadger.thread_local.context, dict(foo='bar', bar='foo'))
 
+
+def test_set_context_with_dict():
+    honeybadger = Honeybadger()
+    honeybadger.set_context(dict(foo='bar'))
+    eq_(honeybadger.thread_local.context, dict(foo='bar'))
+    honeybadger.set_context(dict(foo='bar', bar='foo'))
+    eq_(honeybadger.thread_local.context, dict(foo='bar', bar='foo'))
+
+
 def test_threading():
     hb = Honeybadger()
 

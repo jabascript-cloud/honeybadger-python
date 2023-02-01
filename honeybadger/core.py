@@ -67,10 +67,14 @@ class Honeybadger(object):
         if self.config.is_aws_lambda_environment:
             default_plugin_manager.register(contrib.AWSLambdaPlugin())
 
-    def set_context(self, **kwargs):
+    def set_context(self, ctx=None, **kwargs):
         # This operation is an update, not a set!
+        if not ctx:
+            ctx = kwargs
+        else:
+            ctx.update(kwargs)
         self.thread_local.context = self._get_context()
-        self.thread_local.context.update(kwargs)
+        self.thread_local.context.update(ctx)
 
     def reset_context(self):
         self.thread_local.context = {}
