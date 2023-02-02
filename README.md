@@ -38,7 +38,7 @@ You'll also need to add a new `HONEYBADGER` config variable to your `settings.py
 
 ```python
 HONEYBADGER = {
-  'API_KEY': 'myapikey'
+  'API_KEY': '{{PROJECT_API_KEY}}'
 }
 ```
 
@@ -73,7 +73,7 @@ from honeybadger.contrib import FlaskHoneybadger
 
 app = Flask(__name__)
 app.config['HONEYBADGER_ENVIRONMENT'] = 'production'
-app.config['HONEYBADGER_API_KEY'] = '<your key>'
+app.config['HONEYBADGER_API_KEY'] = '{{PROJECT_API_KEY}}'
 app.config['HONEYBADGER_PARAMS_FILTERS'] = 'password, secret, credit-card'
 FlaskHoneybadger(app, report_exceptions=True)
 
@@ -117,7 +117,7 @@ Here's an example lambda function with Honeybadger:
 
 ```python
 from honeybadger import honeybadger
-honeybadger.configure(api_key='myapikey')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}')
 
 def lambda_handler(event, context):
     """
@@ -148,7 +148,7 @@ You can pass configuration parameters (or *additional* configuration parameters)
 from honeybadger import contrib
 
 asgi_application = someASGIApplication()
-asgi_application = contrib.ASGIHoneybadger(asgi_application, api_key="<your-api-key>", params_filters=["sensible_data"])
+asgi_application = contrib.ASGIHoneybadger(asgi_application, api_key="{{PROJECT_API_KEY}}", params_filters=["sensible_data"])
 
 ```
 
@@ -157,7 +157,7 @@ Or you may want to initialize Honeybadger before your application, and then just
 ```python
 from honeybadger import honeybadger, contrib
 
-honeybadger.configure(api_key='<your-api-key>')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}')
 some_possibly_failing_function()  # you can track errors happening before your plugin initialization.
 asgi_application = someASGIApplication()
 asgi_application = contrib.ASGIHoneybadger(asgi_application)
@@ -183,7 +183,7 @@ You can pass additional keyword paramters, too:
 from fastapi import FastAPI
 from honeybadger import honeybadger, contrib
 
-honeybadger.configure(api_key="<your-api-key>")
+honeybadger.configure(api_key="{{PROJECT_API_KEY}}")
 app = FastAPI()
 app.add_middleware(contrib.ASGIHoneybadger, params_filters=["dont-include-this"])
 ```
@@ -201,7 +201,7 @@ from fastapi import FastAPI, APIRouter
 from honeybadger import honeybadger
 from honeybadger.contrib.fastapi import HoneybadgerRoute
 
-honeybadger.configure(api_key="<your-api-key>")
+honeybadger.configure(api_key="{{PROJECT_API_KEY}}")
 app = FastAPI()
 app.router.route_class = HoneybadgerRoute
 
@@ -254,7 +254,7 @@ Django and Flask are the only explicitly supported frameworks at the moment. For
 
 ```python
 from honeybadger import honeybadger
-honeybadger.configure(api_key='myapikey')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}')
 
 raise Exception("This will get reported!")
 ```
@@ -304,7 +304,7 @@ Honeybadger includes a log handler that can be used to report logs of any level 
 import logging
 from honeybadger.contrib.logger import HoneybadgerHandler
 
-hb_handler = HoneybadgerHandler(api_key='your api key)
+hb_handler = HoneybadgerHandler(api_key='{{PROJECT_API_KEY}}')
 logger = logging.getLogger('honeybadger')
 logger.addHandler(hb_handler)
 
@@ -324,7 +324,7 @@ LOGGING = {
         'honeybadger': {
             'level': 'ERROR',
             'class': 'honeybadger.contrib.logger.HoneybadgerHandler',
-            'api_key': '**YOUR API KEY**',
+            'api_key': '{{PROJECT_API_KEY}}',
         },
     },
     'loggers': {
@@ -342,7 +342,7 @@ LOGGING = {
 To set configuration options, use the `honeybadger.configure` method, like so:
 
 ```python
-honeybadger.configure(api_key='your api key', environment='production')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}', environment='production')
 ```
 
 All of Honeybadger's configuration options can also be set via environment variables with the `HONEYBADGER` prefix (12-factor style). For example, the `api_key` option can be set via the `HONEYBADGER_API_KEY` environment variable.
@@ -410,7 +410,7 @@ Allows you to configure honeybadger within your code. Accepts any of the above-l
 #### Example:
 
 ```python
-honeybadger.configure(api_key='myapikey', project_root='/home/dave/crywolf-django')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}', project_root='/home/dave/crywolf-django')
 ```
 
 ### `honeybadger.notify`: Send an error notice to Honeybadger
