@@ -169,3 +169,26 @@ class DjangoMiddlewareIntegrationTestCase(SimpleTestCase):
             except:
                 pass
             self.assertTrue(request_mock.called)
+
+    @unittest.skipUnless(versions_match(), "Current Python version unsupported by current version of Django")
+    @override_settings(
+        MIDDLEWARE=['honeybadger.contrib.django.DjangoHoneybadgerMiddleware', 'honeybadger.tests.contrib.django_test_app.middleware.CustomMiddleware'],
+        HONEYBADGER={
+            'API_KEY': 'abc123',
+        }
+    )
+    def test_exceptions_handled_by_middleware_with_custom_middleware(self):
+        def assert_payload(req):
+            error_payload = json.loads(str(req.data, "utf-8"))
+            self.assertEqual(req.get_header('X-api-key'), 'abc123')
+            self.assertEqual(req.get_full_url(), '{}/v1/notices/'.format(honeybadger.config.endpoint))
+            self.assertEqual(error_payload['error']['class'], 'str')
+            self.assertEqual(error_payload['error']['message'], 'Custom Middleware Exception')
+                
+        with mock_urlopen(assert_payload) as request_mock:
+            try:
+                response = self.client.get('/plain_view/')
+            except:
+                pass
+            self.assertTrue(request_mock.called)
+        
