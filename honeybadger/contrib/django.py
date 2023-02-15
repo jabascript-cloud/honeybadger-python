@@ -66,12 +66,19 @@ class DjangoPlugin(Plugin):
         :param config: honeybadger configuration.
         :return: a dict with the generated payload.
         """
-        request = current_request()
+        import django
+        if django.VERSION[0] < 2:
+            from django.core.urlresolvers import resolve
+        else:
+            from django.urls import resolve
 
+
+        request = current_request()
+        resolver_match = request.resolver_match or resolve(request.path_info)
         request_payload = {
             'url': request.build_absolute_uri(),
-            'component': request.resolver_match.app_name,
-            'action': request.resolver_match.func.__name__,
+            'component': resolver_match.app_name,
+            'action': resolver_match.func.__name__,
             'params': {},
             'session': {},
             'cgi_data': filter_dict(request.META, config.params_filters),
