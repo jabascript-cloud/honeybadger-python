@@ -5,6 +5,8 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.1] - 2023-02-15
+
 ## [0.15.0] - 2023-02-01
 
 ## [0.14.1] - 2022-12-14
