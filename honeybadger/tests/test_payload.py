@@ -4,12 +4,15 @@ from contextlib import contextmanager
 import os
 import sys
 
-from honeybadger.payload import error_payload
-from honeybadger.payload import server_payload
+from honeybadger.payload import (
+    create_payload, 
+    error_payload, 
+    server_payload
+)
 from honeybadger.config import Configuration
 
 from mock import patch
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, assert_raises
 
 # TODO: figure out how to run Django tests?
 
@@ -69,6 +72,42 @@ def test_error_payload_source_missing_file(_isfile):
             dict(error_class='Exception', error_message='Test'), None, config)
         eq_(payload['backtrace'][0]['source'], {})
 
+def test_payload_captures_exception_cause():
+    with mock_traceback() as traceback_mock:
+        config = Configuration()
+        exception = Exception('Test')
+        exception.__cause__ = Exception('Exception cause')
+
+        payload = error_payload(exc_traceback=None, exception=exception,  config=config)
+        eq_(len(payload['causes']), 1)
+
+def test_error_payload_with_nested_exception():
+    with mock_traceback() as traceback_mock:
+        config = Configuration()
+        exception = Exception('Test')
+        exception_cause = Exception('Exception cause')
+        exception_cause.__cause__ = Exception('Nested')
+        exception.__cause__ = exception_cause
+        payload = error_payload(exc_traceback=None, exception=exception,  config=config)
+        eq_(len(payload['causes']), 2)
+
+def test_error_payload_with_fingerprint():
+    config = Configuration()
+    exception = Exception('Test')
+    payload = error_payload(exception, exc_traceback=None, config=config, fingerprint='a fingerprint')
+    eq_(payload['fingerprint'], 'a fingerprint')
+
+def test_error_payload_with_fingerprint_as_type():
+    config = Configuration()
+    exception = Exception('Test')
+    payload = error_payload(exception, exc_traceback=None, config=config, fingerprint={'a': 1, 'b': 2})
+    eq_(payload['fingerprint'], "{'a': 1, 'b': 2}")
+
+def test_error_payload_without_fingerprint():
+    config = Configuration()
+    exception = Exception('Test')
+    payload = error_payload(exception, exc_traceback=None, config=config)
+    eq_(payload.get('fingerprint'), None)
 
 def test_server_payload():
     config = Configuration(project_root=os.path.dirname(__file__), environment='test', hostname='test.local')
@@ -87,3 +126,18 @@ def test_psutil_is_optional():
     with patch.dict(sys.modules, {'psutil':None}):
         payload = server_payload(config)
         eq_(payload['stats'], {})
+
+def test_create_payload_without_local_variables():
+    config = Configuration()
+    exception = Exception('Test')
+    payload = create_payload(exception, config=config)
+    eq_(payload['request'].get('local_variables'), None)
+
+
+def test_create_payload_with_local_variables():
+    config = Configuration(report_local_variables=True)
+    with assert_raises(Exception):
+        test_local_variable = {"test": "var"}
+        exception = Exception('Test')
+        payload = create_payload(exception, config=config)
+        eq_(payload['request']['local_variables'], test_local_variable)

@@ -5,7 +5,7 @@ When any uncaught exceptions occur, Honeybadger will send the data off to the Ho
 
 ## Supported Versions
 
-Tested with Python 3.5 - 3.8 against Django latest and LTS releases (1.11.29, 2.2.11, 3.0.4) as well as Flask 1.0 and 1.1.
+Tested with Python 3.x against Django latest and LTS releases as well as Flask 1.0 and 1.1.
 
 ## Getting Started
 
@@ -17,7 +17,7 @@ Install honeybadger with pip.
 
 `$ pip install honeybadger`
 
-**Note:** Honeybadger does *not* report errors in development and test
+**Note:** Honeybadger does *not* report errors in `development` and `test`
 environments by default. To enable reporting in development environments, see
 the `force_report_data` setting.
 
@@ -38,7 +38,7 @@ You'll also need to add a new `HONEYBADGER` config variable to your `settings.py
 
 ```python
 HONEYBADGER = {
-  'API_KEY': 'myapikey'
+  'API_KEY': '{{PROJECT_API_KEY}}'
 }
 ```
 
@@ -49,9 +49,9 @@ A Flask extension is available for initializing and configuring Honeybadger: `ho
 - **url**: The URL the request was sent to.
 - **component**: The module that the view is defined at. If the view is a class-based view, then the name of the class is also added.
 - **action**: The name of the function called. If the action is defined within a blueprint, then the action name will have the name of the blueprint prefixed.
-- **params**: A dictionary containing query parameters and form data. If a variable is defined in both, then the form data are stored. Params are filtered (see [Configuration](#config)).
+- **params**: A dictionary containing query parameters and form data. If a variable is defined in both, then the form data are stored. Params are filtered (see [Configuration](#configuration)).
 - **session**: Session data.
-- **cgi_data**: Request headers, filtered (see [Configuration](#config)) and request method.
+- **cgi_data**: Request headers, filtered (see [Configuration](#configuration)) and request method.
 
 In addition, the `FlaskHoneybadger` extension:
 - Configures Honeybadger using Flask's [configuration object](http://flask.pocoo.org/docs/latest/config/#configuration-basics).
@@ -62,7 +62,7 @@ In addition, the `FlaskHoneybadger` extension:
 order for the extension to work, you'll have to install the `blinker` library as dependency.
 
 `FlaskHoneybadger` checks Flask's configuration object for automatically configuring honeybadger. In order to configure it, it checks for the
-keys with same name as the environment variables in [Configuration](#config) section. Note that if a value is also configured as an environment variable,
+keys with same name as the environment variables in [Configuration](#configuration) section. Note that if a value is also configured as an environment variable,
 then the environment variable's value will be used.
 
 #### Example
@@ -72,8 +72,8 @@ from flask import Flask, jsonify, request
 from honeybadger.contrib import FlaskHoneybadger
 
 app = Flask(__name__)
-app.config['HONEYBADGER_ENVIRONMENT'] = 'development'
-app.config['HONEYBADGER_API_KEY'] = '<your key>'
+app.config['HONEYBADGER_ENVIRONMENT'] = 'production'
+app.config['HONEYBADGER_API_KEY'] = '{{PROJECT_API_KEY}}'
 app.config['HONEYBADGER_PARAMS_FILTERS'] = 'password, secret, credit-card'
 FlaskHoneybadger(app, report_exceptions=True)
 
@@ -117,7 +117,7 @@ Here's an example lambda function with Honeybadger:
 
 ```python
 from honeybadger import honeybadger
-honeybadger.configure(api_key='myapikey')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}')
 
 def lambda_handler(event, context):
     """
@@ -148,7 +148,7 @@ You can pass configuration parameters (or *additional* configuration parameters)
 from honeybadger import contrib
 
 asgi_application = someASGIApplication()
-asgi_application = contrib.ASGIHoneybadger(asgi_application, api_key="<your-api-key>", params_filters=["sensible_data"])
+asgi_application = contrib.ASGIHoneybadger(asgi_application, api_key="{{PROJECT_API_KEY}}", params_filters=["sensible_data"])
 
 ```
 
@@ -157,7 +157,7 @@ Or you may want to initialize Honeybadger before your application, and then just
 ```python
 from honeybadger import honeybadger, contrib
 
-honeybadger.configure(api_key='<your-api-key>')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}')
 some_possibly_failing_function()  # you can track errors happening before your plugin initialization.
 asgi_application = someASGIApplication()
 asgi_application = contrib.ASGIHoneybadger(asgi_application)
@@ -183,7 +183,7 @@ You can pass additional keyword paramters, too:
 from fastapi import FastAPI
 from honeybadger import honeybadger, contrib
 
-honeybadger.configure(api_key="<your-api-key>")
+honeybadger.configure(api_key="{{PROJECT_API_KEY}}")
 app = FastAPI()
 app.add_middleware(contrib.ASGIHoneybadger, params_filters=["dont-include-this"])
 ```
@@ -192,7 +192,7 @@ app.add_middleware(contrib.ASGIHoneybadger, params_filters=["dont-include-this"]
 
 Consuming the request body in an ASGI application's middleware is [problematic and discouraged](https://github.com/encode/starlette/issues/495#issuecomment-494008175). This is the reason why request body data won't be sent to the web UI.
 
-FastAPI allows overriding the logic used by the `Request` and `APIRoute` classes, by [using custom `APIRoute` classes](https://fastapi.tiangolo.com/advanced/custom-request-and-route/). This gives more control over the request body, and makes it possible to send request body data along with honeybadger notifications. 
+FastAPI allows overriding the logic used by the `Request` and `APIRoute` classes, by [using custom `APIRoute` classes](https://fastapi.tiangolo.com/advanced/custom-request-and-route/). This gives more control over the request body, and makes it possible to send request body data along with honeybadger notifications.
 
 A custom API Route is available at [`honeybadger.contrib.fastapi`](./honeybadger/contrib/fastapi):
 
@@ -201,7 +201,7 @@ from fastapi import FastAPI, APIRouter
 from honeybadger import honeybadger
 from honeybadger.contrib.fastapi import HoneybadgerRoute
 
-honeybadger.configure(api_key="<your-api-key>")
+honeybadger.configure(api_key="{{PROJECT_API_KEY}}")
 app = FastAPI()
 app.router.route_class = HoneybadgerRoute
 
@@ -222,15 +222,41 @@ app = Starlette()
 app.add_middleware(contrib.ASGIHoneybadger)
 ```
 
+### Celery
+
+A Celery extension is available for initializing and configuring Honeybadger: `honeybadger.contrib.celery.CeleryHoneybadger`. The extension adds the following information to reported exceptions:
+
+- **component**: The module that the task is defined at.
+- **action**: The name of the task.
+- **params**: The arguments and keyword arguments passed to the task.
+- **context**: A dictionary containing the following:
+  - **task_id**: The id of the current task.
+  - **retries**: The number of retries that have been attempted.
+  - **max_retries**: The maximum number of retries that will be attempted.
+
+#### Example
+
+```python
+from celery import Celery
+from honeybadger.contrib import CeleryHoneybadger
+
+app = Celery(__name__)
+app.conf.update(
+  HONEYBADGER_API_KEY= '<your key>',
+  HONEYBADGER_ENVIRONMENT= 'production'
+)
+CeleryHoneybadger(app, report_exceptions=True)
+```
+  
 ### Other frameworks / plain Python app
 
 Django and Flask are the only explicitly supported frameworks at the moment. For other frameworks (tornado, web2py, etc.) or a plain Python script, simply import honeybadger and configure it with your API key. Honeybadger uses a global exception hook to automatically report any uncaught exceptions.
 
 ```python
 from honeybadger import honeybadger
-honeybadger.configure(api_key='myapikey')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}')
 
-raise Exception, "This will get reported!"
+raise Exception("This will get reported!")
 ```
 
 ### All set!
@@ -278,7 +304,7 @@ Honeybadger includes a log handler that can be used to report logs of any level 
 import logging
 from honeybadger.contrib.logger import HoneybadgerHandler
 
-hb_handler = HoneybadgerHandler(api_key='your api key)
+hb_handler = HoneybadgerHandler(api_key='{{PROJECT_API_KEY}}')
 logger = logging.getLogger('honeybadger')
 logger.addHandler(hb_handler)
 
@@ -298,7 +324,7 @@ LOGGING = {
         'honeybadger': {
             'level': 'ERROR',
             'class': 'honeybadger.contrib.logger.HoneybadgerHandler',
-            'api_key': '**YOUR API KEY**',
+            'api_key': '{{PROJECT_API_KEY}}',
         },
     },
     'loggers': {
@@ -316,23 +342,27 @@ LOGGING = {
 To set configuration options, use the `honeybadger.configure` method, like so:
 
 ```python
-honeybadger.configure(api_key='your api key', environment='production')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}', environment='production')
 ```
 
 All of Honeybadger's configuration options can also be set via environment variables with the `HONEYBADGER` prefix (12-factor style). For example, the `api_key` option can be set via the `HONEYBADGER_API_KEY` environment variable.
 
 The following options are available to you:
 
-|  Name | Type | Default | Example | Environment variable |
-| ----- | ---- | ------- | ------- | -------------------- |
-| api_key | `str` | `""` | `"badgers"` | `HONEYBADGER_API_KEY` |
-| project_root | `str` | The current working directory | `"/path/to/project"` | `HONEYBADGER_PROJECT_ROOT` |
-| environment | `str` | `"production"` | `"staging"` | `HONEYBADGER_ENVIRONMENT` |
-| hostname | `str` | The hostname of the current server. | `"badger01"` | `HONEYBADGER_HOSTNAME` |
-| endpoint | `str` | `"https://api.honeybadger.io"` | `"https://honeybadger.example.com/"` | `HONEYBADGER_ENDPOINT` |
-| params_filters | `list` | `['password', 'password_confirmation', 'credit_card']` | `['super', 'secret', 'keys']` | `HONEYBADGER_PARAMS_FILTERS` |
-| force_report_data | `bool` | `False` | `True` | `HONEYBADGER_FORCE_REPORT_DATA` |
-| force_sync | `bool` | `False` | `True` | `HONEYBADGER_FORCE_SYNC` |
+| Name                   | Type   | Default                                                | Example                               | Environment variable                 |
+|------------------------|--------|--------------------------------------------------------|---------------------------------------|--------------------------------------|
+| api_key                | `str`  | `""`                                                   | `"badgers"`                           | `HONEYBADGER_API_KEY`                |
+| project_root           | `str`  | The current working directory                          | `"/path/to/project"`                  | `HONEYBADGER_PROJECT_ROOT`           |
+| environment[^1]        | `str`  | `"production"`                                         | `"staging"`                           | `HONEYBADGER_ENVIRONMENT`            |
+| hostname               | `str`  | The hostname of the current server.                    | `"badger01"`                          | `HONEYBADGER_HOSTNAME`               |
+| endpoint               | `str`  | `"https://api.honeybadger.io"`                         | `"https://honeybadger.example.com/"`  | `HONEYBADGER_ENDPOINT`               |
+| params_filters         | `list` | `['password', 'password_confirmation', 'credit_card']` | `['super', 'secret', 'keys']`         | `HONEYBADGER_PARAMS_FILTERS`         |
+| force_report_data      | `bool` | `False`                                                | `True`                                | `HONEYBADGER_FORCE_REPORT_DATA`      |
+| excluded_exceptions    | `list` | `[]`                                                   | `['Http404', 'MyCustomIgnoredError']` | `HONEYBADGER_EXCLUDED_EXCEPTIONS`    |
+| force_sync             | `bool` | `False`                                                | `True`                                | `HONEYBADGER_FORCE_SYNC`             |
+| report_local_variables | `bool` | `False`                                                | `True`                                | `HONEYBADGER_REPORT_LOCAL_VARIABLES` |
+
+[^1]: Honeybadger will try to infer the correct environment when possible. For example, in the case of the Django integration, if Django settings are set to `DEBUG = True`, the environment will default to `development`.  
 
 ## Public Methods
 
@@ -380,12 +410,15 @@ Allows you to configure honeybadger within your code. Accepts any of the above-l
 #### Example:
 
 ```python
-honeybadger.configure(api_key='myapikey', project_root='/home/dave/crywolf-django')
+honeybadger.configure(api_key='{{PROJECT_API_KEY}}', project_root='/home/dave/crywolf-django')
 ```
 
 ### `honeybadger.notify`: Send an error notice to Honeybadger
 
-In cases where you'd like to manually send error notices to Honeybadger, this is what you're looking for. You can either pass it an exception as the first argument, or an `error_class`/`error_message` pair of keyword arguments. You can also pass it a custom context dictionary which will get merged with the global context.
+In cases where you'd like to manually send error notices to Honeybadger, this is what you're looking for. You can either pass it an exception as the first argument, or an `error_class`/`error_message` pair of keyword arguments.
+You can also pass it a:
+- custom context dictionary which will get merged with the global context
+- `fingerprint` option to customize the [error grouping](https://docs.honeybadger.io/guides/errors/#error-grouping)
 
 #### Examples:
 
@@ -398,7 +431,7 @@ except KeyError, exc:
   honeybadger.notify(exc, context={'foo': 'bar'})
 
 # with custom arguments
-honeybadger.notify(error_class='ValueError', error_message='Something bad happened!')
+honeybadger.notify(error_class='ValueError', error_message='Something bad happened!', fingerprint='custom_fingerprint')
 ```
 
 ## Development
@@ -433,6 +466,13 @@ See https://github.com/honeybadger-io/honeybadger-python/blob/master/CHANGELOG.m
 
 ## Publishing a release on PyPI
 
+### Github Workflow
+
+A new version can be published on PyPi using the [Publish new version on PyPi](.github/workflows/pypi-publish.yml) workflow.
+The workflow can be triggered manually from the Github Actions page and takes a version input.
+
+### Manual Release 
+
 1. Ensure the latest version of twine is installed with `pip install --upgrade twine wheel`
 1. Update the version in [honeybadger/version.py](./honeybadger/version.py)
 1. Update unreleased heading in [CHANGELOG.md](./CHANGELOG.md)
@@ -441,7 +481,6 @@ See https://github.com/honeybadger-io/honeybadger-python/blob/master/CHANGELOG.m
 1. Tag changes: `git tag v[version]`, i.e.: `git tag v0.3.0`
 1. Push changes to GitHub: `git push origin master --tags`
 1. Clean out the existing dist dir with `rm -rf dist/`
-1. Run `python setup.py bdist_wheel` which will build the python2 package in dist/
 1. Run `python3 setup.py bdist_wheel` which will build the python3 package in dist/
 1. Run `twine upload dist/*` to upload the release to PyPI
 

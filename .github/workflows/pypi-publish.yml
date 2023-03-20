@@ -1,0 +1,61 @@
+name: Publish new version on PyPi
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Set new version!
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PYPI_PUBLISH_PAT }}
+          fetch-depth: 0
+          ref: master
+
+      - name: Git Config
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Set package version in version.py
+        run: |
+          echo "__version__ = '${{ inputs.version }}'" > honeybadger/version.py
+          cat honeybadger/version.py
+
+      - name: Update changelog
+        run: |
+          printf -v date '%(%Y-%m-%d)T\n' -1
+          sed -i "6 a ## [${{ inputs.version }}] - $date" CHANGELOG.md
+          sed -i '/## \[Unreleased\]/{G;}' CHANGELOG.md
+          cat CHANGELOG.md
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Build for python 3
+        run: |
+          pip install --upgrade twine wheel
+          python setup.py bdist_wheel
+          ls dist
+
+      - name: Upload
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
+
+      - name: Push version on git
+        run: |
+          git commit -am "Release ${{ inputs.version }}"
+          git tag v${{ inputs.version }}
+          git push origin master --tags

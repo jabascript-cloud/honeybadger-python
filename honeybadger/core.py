@@ -19,8 +19,8 @@ class Honeybadger(object):
         self.thread_local = threading.local()
         self.thread_local.context = {}
 
-    def _send_notice(self, exception, exc_traceback=None, context=None):
-        payload = create_payload(exception, exc_traceback, config=self.config, context=context)
+    def _send_notice(self, exception, exc_traceback=None, context=None, fingerprint=None):
+        payload = create_payload(exception, exc_traceback, config=self.config, context=context, fingerprint=fingerprint)
         if self.config.is_dev() and not self.config.force_report_data:
             fake_connection.send_notice(self.config, payload)
         else:
@@ -40,7 +40,10 @@ class Honeybadger(object):
         self._send_notice(value, exc_traceback, context=self._get_context())
         self.existing_except_hook(type, value, exc_traceback)
 
-    def notify(self, exception=None, error_class=None, error_message=None, context=None):
+    def notify(self, exception=None, error_class=None, error_message=None, context={}, fingerprint=None):
+        if exception and exception.__class__.__name__ in self.config.excluded_exceptions:
+            return #Terminate the function
+
         if exception is None:
             exception = {
                 'error_class': error_class,
@@ -51,7 +54,7 @@ class Honeybadger(object):
         if context:
             merged_context.update(context)
 
-        return self._send_notice(exception, context=merged_context)
+        return self._send_notice(exception, context=merged_context, fingerprint=fingerprint)
 
     def configure(self, **kwargs):
         self.config.set_config_from_dict(kwargs)
@@ -60,14 +63,18 @@ class Honeybadger(object):
     def auto_discover_plugins(self):
         #Avoiding circular import error
         from honeybadger import contrib
-        
+
         if self.config.is_aws_lambda_environment:
             default_plugin_manager.register(contrib.AWSLambdaPlugin())
 
-    def set_context(self, **kwargs):
+    def set_context(self, ctx=None, **kwargs):
         # This operation is an update, not a set!
+        if not ctx:
+            ctx = kwargs
+        else:
+            ctx.update(kwargs)
         self.thread_local.context = self._get_context()
-        self.thread_local.context.update(kwargs)
+        self.thread_local.context.update(ctx)
 
     def reset_context(self):
         self.thread_local.context = {}

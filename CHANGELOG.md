@@ -5,6 +5,41 @@ adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.1] - 2023-02-15
+
+## [0.15.0] - 2023-02-01
+
+## [0.14.1] - 2022-12-14
+
+## [0.14.0] - 2022-12-10
+### Added
+- Add Celery integration. (#124)
+
+## [0.13.0] - 2022-11-11
+
+## [0.12.0] - 2022-10-04
+
+## [0.11.0] - 2022-09-23
+### Fixed
+- Make fingerprint a top-level function parameter (#115)
+
+## [0.10.0] - 2022-09-09
+### Added
+- Allow passing fingerprint in `notify()` (#115)
+
+## [0.9.0] - 2022-08-18
+### Added
+- Recursively add nested exceptions to exception 'causes'
+
+## [0.8.0] - 2021-11-01
+### Added
+- Added `excluded_exceptions` config option (#98)
+
+## [0.7.1] - 2021-09-13
+### Fixed
+- Fixed post-python3.7 lambda bug: (#95, #97)
+  > Lambda function not wrapped by honeybadger: module 'main' has no attribute 'handle_http_request'
+
 ## [0.7.0] - 2021-08-16
 ### Added
 - Added log handler (#82)

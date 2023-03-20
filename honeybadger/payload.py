@@ -2,6 +2,7 @@ import sys
 import traceback
 import os
 import logging
+import inspect
 from six.moves import range
 from six.moves import zip
 from io import open
@@ -9,11 +10,11 @@ from datetime import datetime
 
 from .version import __version__
 from .plugins import default_plugin_manager
-
+from .utils import filter_dict
 logger = logging.getLogger('honeybadger.payload')
 
 
-def error_payload(exception, exc_traceback, config):
+def error_payload(exception, exc_traceback, config, fingerprint=None):
     def _filename(name):
         return name.replace(config.project_root, '[PROJECT_ROOT]')
 
@@ -25,6 +26,12 @@ def error_payload(exception, exc_traceback, config):
         # for building a payload.
         return not ('honeybadger' in frame[0] and frame[2] in ['notify', '_send_notice', 'create_payload', 'error_payload'])
 
+    def prepare_exception_payload(exception, exclude=None):
+        return {
+            'class': type(exception) is dict and exception['error_class'] or exception.__class__.__name__,
+            'message': type(exception) is dict and exception['error_message'] or str(exception),
+            'backtrace': [dict(number=f[1], file=_filename(f[0]), method=f[2], source=read_source(f)) for f in reversed(tb)],
+        }
 
     if exc_traceback:
         tb = traceback.extract_tb(exc_traceback)
@@ -33,11 +40,17 @@ def error_payload(exception, exc_traceback, config):
 
     logger.debug(tb)
 
-    payload = {
-        'class': type(exception) is dict and exception['error_class'] or exception.__class__.__name__,
-        'message': type(exception) is dict and exception['error_message'] or str(exception),
-        'backtrace': [dict(number=f[1], file=_filename(f[0]), method=f[2], source=read_source(f)) for f in reversed(tb)]
-    }
+    payload = prepare_exception_payload(exception)
+
+    if fingerprint is not None:
+        payload['fingerprint'] = fingerprint and str(fingerprint).strip() or None
+
+    payload['causes'] = []
+
+    # If exception has a __cause__, Recursively build the causes list.
+    while hasattr(exception, '__cause__') and exception.__cause__ is not None:
+            exception = exception.__cause__
+            payload['causes'].append(prepare_exception_payload(exception))
 
     return payload
 
@@ -62,7 +75,7 @@ def server_payload(config):
         'pid': os.getpid(),
         'stats': stats_payload()
     }
-    
+
 
 def stats_payload():
     try:
@@ -91,10 +104,20 @@ def stats_payload():
 
         return payload
 
-def create_payload(exception, exc_traceback=None, config=None, context=None):
+def create_payload(exception, exc_traceback=None, config=None, context=None, fingerprint=None):
+    # if using local_variables get them
+    local_variables = None
+    if config and config.report_local_variables:
+        try:
+            local_variables = filter_dict(
+                inspect.trace()[-1][0].f_locals, config.params_filters
+            )
+        except Exception as e:
+            pass
+
     if exc_traceback is None:
         exc_traceback = sys.exc_info()[2]
-    
+
     #if context is None, Initialize as an emptty dict
     if not context:
         context = {}
@@ -105,10 +128,13 @@ def create_payload(exception, exc_traceback=None, config=None, context=None):
             'url': "https://github.com/honeybadger-io/honeybadger-python",
             'version': __version__
         },
-        'error':  error_payload(exception, exc_traceback, config),
+        'error':  error_payload(exception, exc_traceback, config, fingerprint),
         'server': server_payload(config),
-        'request': {'context':context}
+        'request': {
+            'context': context,
+            'local_variables': local_variables
+        }
     }
 
     return default_plugin_manager.generate_payload(payload, config, context)
-    
+
