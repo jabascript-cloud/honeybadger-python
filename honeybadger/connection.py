@@ -31,7 +31,7 @@ def send_notice(config, payload):
 
 
     if config.force_sync:
-        return send_request()
+        send_request()
         
     else:
         t = threading.Thread(target=send_request)
