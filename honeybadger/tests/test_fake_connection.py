@@ -6,7 +6,7 @@ import json
 @log_capture()
 def test_send_notice_logging(l):
     config = {'api_key': 'aaa'}
-    payload = json.dumps({'test': 'payload'})
+    payload = {'test': 'payload', 'error':{'token': '1234'}}
 
     send_notice(config, payload)
 

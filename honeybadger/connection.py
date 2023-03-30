@@ -10,6 +10,7 @@ from .utils import StringReprJSONEncoder
 logger = logging.getLogger(__name__)
 
 def send_notice(config, payload):
+    notice_id = payload.get("error", {}).get("token", None)
     request_object = request.Request(url="{}/v1/notices/".format(config.endpoint),
                                         data=b(json.dumps(payload, cls=StringReprJSONEncoder)))
 
@@ -28,11 +29,6 @@ def send_notice(config, payload):
         if status != 201:
             logger.error("Received error response [{}] from Honeybadger API.".format(status))
 
-        response_json = json.loads(response.read().decode('utf-8'))
-        report_id = response_json.get('id')
-        logger.info("Reported error to Honeybadger (report id: {})".format(report_id))
-
-        return report_id
 
     if config.force_sync:
         return send_request()
@@ -40,3 +36,6 @@ def send_notice(config, payload):
     else:
         t = threading.Thread(target=send_request)
         t.start()
+
+
+    return notice_id

@@ -22,7 +22,7 @@ class Honeybadger(object):
     def _send_notice(self, exception, exc_traceback=None, context=None, fingerprint=None):
         payload = create_payload(exception, exc_traceback, config=self.config, context=context, fingerprint=fingerprint)
         if self.config.is_dev() and not self.config.force_report_data:
-            fake_connection.send_notice(self.config, payload)
+            return fake_connection.send_notice(self.config, payload)
         else:
             return connection.send_notice(self.config, payload)
 
