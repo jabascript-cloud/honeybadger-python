@@ -3,6 +3,7 @@ import traceback
 import os
 import logging
 import inspect
+import uuid
 from six.moves import range
 from six.moves import zip
 from io import open
@@ -28,6 +29,7 @@ def error_payload(exception, exc_traceback, config, fingerprint=None):
 
     def prepare_exception_payload(exception, exclude=None):
         return {
+            'token': str(uuid.uuid4()),
             'class': type(exception) is dict and exception['error_class'] or exception.__class__.__name__,
             'message': type(exception) is dict and exception['error_message'] or str(exception),
             'backtrace': [dict(number=f[1], file=_filename(f[0]), method=f[2], source=read_source(f)) for f in reversed(tb)],

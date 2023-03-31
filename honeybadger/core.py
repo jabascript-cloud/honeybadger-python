@@ -22,9 +22,9 @@ class Honeybadger(object):
     def _send_notice(self, exception, exc_traceback=None, context=None, fingerprint=None):
         payload = create_payload(exception, exc_traceback, config=self.config, context=context, fingerprint=fingerprint)
         if self.config.is_dev() and not self.config.force_report_data:
-            fake_connection.send_notice(self.config, payload)
+            return fake_connection.send_notice(self.config, payload)
         else:
-            connection.send_notice(self.config, payload)
+            return connection.send_notice(self.config, payload)
 
     def _get_context(self):
         return getattr(self.thread_local, 'context', {})
@@ -54,7 +54,7 @@ class Honeybadger(object):
         if context:
             merged_context.update(context)
 
-        self._send_notice(exception, context=merged_context, fingerprint=fingerprint)
+        return self._send_notice(exception, context=merged_context, fingerprint=fingerprint)
 
     def configure(self, **kwargs):
         self.config.set_config_from_dict(kwargs)
