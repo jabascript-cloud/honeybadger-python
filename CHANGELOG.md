@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.15.2] - 2023-03-31
 - honeybadger.notify() now returns notice uuid (#139) 
 
 ## [0.15.1] - 2023-02-15
