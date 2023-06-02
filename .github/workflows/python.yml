@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [ master, django4 ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
