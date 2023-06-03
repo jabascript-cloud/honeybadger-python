@@ -117,7 +117,7 @@ def create_payload(exception, exc_traceback=None, config=None, context=None, fin
             local_variables = filter_dict(
                 inspect.trace()[-1][0].f_locals, config.params_filters
             )
-        except Exception:
+        except Exception as e:
             pass
 
     if exc_traceback is None:

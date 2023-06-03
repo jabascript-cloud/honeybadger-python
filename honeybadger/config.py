@@ -47,7 +47,7 @@ class Configuration(object):
                     val = int(val)
                 elif option_types[option] is bool:
                     val = bool(val)
-            except Exception:
+            except:
                 pass
 
             setattr(self, option, val)

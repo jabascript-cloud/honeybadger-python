@@ -1,5 +1,5 @@
 import json
-
+import logging
 from nose.tools import eq_
 from six import b
 from .utils import mock_urlopen
@@ -19,7 +19,7 @@ def test_connection_success():
         eq_(request_object.get_full_url(), '{}/v1/notices/'.format(config.endpoint))
         eq_(request_object.data, b(json.dumps(payload)))
 
-    with mock_urlopen(test_request):
+    with mock_urlopen(test_request) as request_mock:
         send_notice(config, payload)
 
 
@@ -32,7 +32,7 @@ def test_connection_returns_notice_id():
     def test_payload(request_object):
         eq_(request_object.data, b(json.dumps(payload)))
 
-    with mock_urlopen(test_payload):
+    with mock_urlopen(test_payload) as request_mock:
         eq_(send_notice(config, payload), notice_id)
 
 

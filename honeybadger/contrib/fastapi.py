@@ -1,3 +1,4 @@
+import logging
 
 from fastapi.routing import APIRoute
 from fastapi import exceptions

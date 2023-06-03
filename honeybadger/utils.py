@@ -5,7 +5,7 @@ class StringReprJSONEncoder(json.JSONEncoder):
     def default(self, o):
         try:
             return repr(o)
-        except Exception:
+        except:
             return '[unserializable]'
 
 

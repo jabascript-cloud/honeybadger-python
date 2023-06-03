@@ -15,7 +15,7 @@ class CeleryPlugin(Plugin):
         :param context: current honeybadger configuration.
         :return: True if this is a celery task, False else.
         """
-        return current_task is not None
+        return current_task != None
 
     def generate_payload(self, default_payload, config, context):
         """

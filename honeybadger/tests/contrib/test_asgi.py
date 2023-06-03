@@ -44,5 +44,5 @@ class ASGIPluginTestCase(unittest.TestCase):
     @aiounittest.async_test
     @mock.patch("honeybadger.contrib.asgi.honeybadger")
     async def test_should_not_notify_exception(self, hb):
-        self.client.get("/")
+        response = self.client.get("/")
         hb.notify.assert_not_called()

@@ -1,7 +1,8 @@
 import json
 import threading
 
-from nose.tools import eq_
+from nose.tools import eq_, ok_
+from nose.tools import raises
 
 from .utils import mock_urlopen
 from honeybadger import Honeybadger
@@ -84,7 +85,7 @@ def test_notify_with_custom_params():
 
     hb = Honeybadger()
 
-    with mock_urlopen(test_payload):
+    with mock_urlopen(test_payload) as request_mock:
         hb.configure(api_key='aaa', force_report_data=True)
         hb.notify(error_class='Exception', error_message='Test message.', context={'foo': 'bar'})
 
@@ -98,7 +99,7 @@ def test_notify_with_fingerprint():
 
     hb = Honeybadger()
 
-    with mock_urlopen(test_payload):
+    with mock_urlopen(test_payload) as request_mock:
         hb.configure(api_key='aaa', force_report_data=True)
         hb.notify(error_class='Exception', error_message='Test message.', fingerprint='custom_fingerprint')
 
@@ -111,7 +112,7 @@ def test_notify_with_exception():
 
     hb = Honeybadger()
 
-    with mock_urlopen(test_payload):
+    with mock_urlopen(test_payload) as request_mock:
         hb.configure(api_key='aaa', force_report_data=True)
         hb.notify(ValueError('Test value error.'))
 
@@ -124,7 +125,7 @@ def test_notify_with_excluded_exception():
 
     hb = Honeybadger()
 
-    with mock_urlopen(test_payload):
+    with mock_urlopen(test_payload) as request_mock:
         hb.configure(api_key='aaa', force_report_data=True, excluded_exceptions=['ValueError'])
         hb.notify(ValueError('Test value error.'))
         hb.notify(AttributeError('Test attribute error.'))
@@ -137,7 +138,7 @@ def test_notify_context_merging():
 
     hb = Honeybadger()
 
-    with mock_urlopen(test_payload):
+    with mock_urlopen(test_payload) as request_mock:
         hb.configure(api_key='aaa', force_report_data=True)
         hb.set_context(foo='bar')
         hb.notify(error_class='Exception', error_message='Test.', context=dict(bar='foo'))
