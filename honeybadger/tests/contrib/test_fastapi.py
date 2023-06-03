@@ -1,5 +1,4 @@
 import unittest
-import aiounittest
 import mock
 from honeybadger.contrib.fastapi import HoneybadgerRoute
 from fastapi import FastAPI

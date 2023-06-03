@@ -9,7 +9,6 @@ from django.conf import settings
 from django.test import RequestFactory
 from django.test import SimpleTestCase
 from django.test import override_settings
-from django.test import modify_settings
 from django.test import Client
 
 from honeybadger import honeybadger
@@ -21,12 +20,11 @@ from honeybadger.contrib.django import set_request
 from honeybadger.contrib.django import current_request
 
 from .django_test_app.views import plain_view
-from .django_test_app.views import always_fails
 from ..utils import mock_urlopen
 
 try:
     settings.configure()
-except:
+except Exception:
     pass
 
 
@@ -130,7 +128,7 @@ class DjangoMiddlewareTestCase(unittest.TestCase):
         request.resolver_match = self.url.resolve('test')
 
         middleware = DjangoHoneybadgerMiddleware(self.get_response)
-        response = middleware(request)
+        middleware(request)
 
         self.assertDictEqual({}, honeybadger._get_context(), msg='Context should be cleared after response handling')
         self.assertIsNone(current_request(), msg='Current request should be cleared after response handling')
@@ -147,7 +145,7 @@ class DjangoMiddlewareIntegrationTestCase(SimpleTestCase):
     @unittest.skipUnless(versions_match(), "Current Python version unsupported by current version of Django")
     def test_context_cleared_after_response(self):
         self.assertIsNone(current_request(), msg='Current request should be empty prior to request')
-        response = self.client.get('/plain_view')
+        self.client.get('/plain_view')
         self.assertIsNone(current_request(), msg='Current request should be cleared after request processed')
 
     @unittest.skipUnless(versions_match(), "Current Python version unsupported by current version of Django")
@@ -167,8 +165,8 @@ class DjangoMiddlewareIntegrationTestCase(SimpleTestCase):
 
         with mock_urlopen(assert_payload) as request_mock:
             try:
-                response = self.client.get('/always_fails/')
-            except:
+                self.client.get('/always_fails/')
+            except Exception:
                 pass
             self.assertTrue(request_mock.called)
 
@@ -190,7 +188,7 @@ class DjangoMiddlewareIntegrationTestCase(SimpleTestCase):
 
         with mock_urlopen(assert_payload) as request_mock:
             try:
-                response = self.client.get('/plain_view/')
-            except:
+                self.client.get('/plain_view/')
+            except Exception:
                 pass
             self.assertTrue(request_mock.called)

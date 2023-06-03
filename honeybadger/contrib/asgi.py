@@ -59,7 +59,7 @@ def _get_body(scope: dict) -> dict:
 
     try:
         return json.loads(body)
-    except:
+    except Exception:
         return urllib.parse.unquote(body.decode("latin-1"))
 
 

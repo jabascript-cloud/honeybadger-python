@@ -33,7 +33,7 @@ def test_config_bool_types_are_accurate():
     os.environ['HONEYBADGER_FORCE_REPORT_DATA'] = '1'
     c = Configuration()
     del os.environ['HONEYBADGER_FORCE_REPORT_DATA']
-    assert c.force_report_data == True
+    assert c.force_report_data is True
 
 
 @raises(AttributeError)
@@ -57,9 +57,9 @@ def test_is_dev_true_for_dev_environments():
 
 def test_is_dev_false_for_non_dev_environments():
     c = Configuration(environment='production')
-    assert c.is_dev() == False
+    assert c.is_dev() is False
 
 
 def test_force_report_data_not_active():
     c = Configuration()
-    assert c.force_report_data == False
+    assert c.force_report_data is False

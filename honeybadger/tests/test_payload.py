@@ -71,7 +71,7 @@ def test_error_payload_source_line_midfile():
 
 @patch('os.path.isfile', return_value=False)
 def test_error_payload_source_missing_file(_isfile):
-    with mock_traceback(line_no=5) as traceback_mock:
+    with mock_traceback(line_no=5):
         config = Configuration()
         payload = error_payload(
             dict(error_class='Exception', error_message='Test'), None, config)
@@ -79,7 +79,7 @@ def test_error_payload_source_missing_file(_isfile):
 
 
 def test_payload_captures_exception_cause():
-    with mock_traceback() as traceback_mock:
+    with mock_traceback():
         config = Configuration()
         exception = Exception('Test')
         exception.__cause__ = Exception('Exception cause')
@@ -89,7 +89,7 @@ def test_payload_captures_exception_cause():
 
 
 def test_error_payload_with_nested_exception():
-    with mock_traceback() as traceback_mock:
+    with mock_traceback():
         config = Configuration()
         exception = Exception('Test')
         exception_cause = Exception('Exception cause')

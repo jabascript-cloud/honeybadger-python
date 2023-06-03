@@ -85,7 +85,7 @@ class Honeybadger(object):
         self.set_context(**kwargs)
         try:
             yield
-        except:
+        except Exception:
             raise
         else:
             self.thread_local.context = original_context

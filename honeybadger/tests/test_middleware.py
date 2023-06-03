@@ -12,7 +12,7 @@ class MiddlewareTestCase(DjangoMiddlewareTestCase):
     def test_middleware_import_warning(self):
         default_plugin_manager._registered = OrderedDict()
         with warnings.catch_warnings(record=True) as w:
-            middleware = DjangoHoneybadgerMiddleware()
+            DjangoHoneybadgerMiddleware()
             assert len(w) == 1
             assert issubclass(w[-1].category, FutureWarning)
             assert "moved" in str(w[-1].message)

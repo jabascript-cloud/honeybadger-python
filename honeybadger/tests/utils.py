@@ -1,8 +1,6 @@
 from contextlib import contextmanager
 from mock import patch
 from mock import DEFAULT
-import six
-import time
 from threading import Event
 
 
