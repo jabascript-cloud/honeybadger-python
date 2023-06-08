@@ -37,7 +37,9 @@ def versions_match():
         '1.11': sys.version_info >= (3, 5),
         '2.2':  sys.version_info >= (3, 5),
         '3.0':  sys.version_info >= (3, 6),
-        '3.1':  sys.version_info >= (3, 6)
+        '3.1':  sys.version_info >= (3, 6),
+        '3.2':  sys.version_info >= (3, 6),
+        '4.2':  sys.version_info >= (3, 8)
     }
 
     for django_version, supported in VERSION_MATRIX.items():
