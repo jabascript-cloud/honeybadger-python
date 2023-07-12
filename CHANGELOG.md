@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.16.0] - 2023-07-12
 - Django example actually generates an alert
 - Target Django v4 in CI but not with Python v3.7
 - Added Django v3.2 and v4.2 in version matrix for tests
