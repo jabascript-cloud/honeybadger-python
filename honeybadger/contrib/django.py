@@ -116,6 +116,7 @@ class DjangoHoneybadgerMiddleware(object):
     def __call__(self, request):
         set_request(request)
         honeybadger.begin_request(request)
+        self.__set_user_from_context(request)
 
         response = self.get_response(request)
 
@@ -128,3 +129,11 @@ class DjangoHoneybadgerMiddleware(object):
         honeybadger.notify(exception)
         clear_request()
         return None
+
+    def __set_user_from_context(self, request):
+        # in Django 1 request.user.is_authenticated is a function, in Django 2+ it's a boolean
+        if hasattr(request, 'user') and (
+                (isinstance(request.user.is_authenticated, bool) and request.user.is_authenticated)
+                or (callable(request.user.is_authenticated) and request.user.is_authenticated())
+        ):
+            honeybadger.set_context(username=request.user.get_username())
