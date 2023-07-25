@@ -137,3 +137,4 @@ class DjangoHoneybadgerMiddleware(object):
                 or (callable(request.user.is_authenticated) and request.user.is_authenticated())
         ):
             honeybadger.set_context(username=request.user.get_username())
+            honeybadger.set_context(user_id=request.user.id)
