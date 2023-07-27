@@ -4,6 +4,8 @@ CHANGELOG](http://keepachangelog.com/) for how to update this file. This project
 adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.17.0] - 2023-07-27
 - Django: Automatically capture user id and user name when available
 
 ## [0.16.0] - 2023-07-12
